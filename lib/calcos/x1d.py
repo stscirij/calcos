@@ -9,16 +9,18 @@ import getopt
 import numpy as np
 import astropy.io.fits as fits
 
-from . import calcosparam                      # parameter definitions
-from . import cosutil
-from . import getinfo
-from . import extract
-from . import spwcs
-from . import timetag
+from calcos import calcosparam                      # parameter definitions
+from calcos import cosutil
+from calcos import getinfo
+from calcos import extract
+from calcos import spwcs
+from calcos import timetag
 
-from .version import *
+from calcos.version import *
 
 first_message = True                    # initial values
+
+active_area = None
 
 def main(args):
     """This is a driver to perform 1-D extraction for one file.
@@ -444,8 +446,25 @@ def makeFltCounts(cal_ver, corrtag, flt, counts):
     minmax_shift_dict = timetag.getWavecalOffsets(
                 events, info, switches["wavecorr"], reffiles["xtractab"],
                 reffiles["brftab"])
+    #
+    # Need trace profile
+    tracemask = timetag.createTraceMask(events, info, switches,
+                                reffiles['xtractab'], active_area)
+
+    traceprofile = timetag.doTraceCorr(events, info, switches, reffiles, phdr,
+                               tracemask)
+
+    #
+    # Make sure we have a gti variable, and make one if we don't.  None is OK, it will be
+    # detected and filled in later if necessary
+    try:
+        temp_gti = gti
+    except NameError:
+        gti = None
+    
     dq_array = timetag.doDqicorr(events, corrtag, info, switches, reffiles,
-                                 phdr, headers[1], minmax_shift_dict)
+                                 phdr, headers[1], minmax_shift_dict,
+                                 traceprofile, gti)
 
     timetag.writeImages(x, y, epsilon, dq,
                         phdr, headers, dq_array, npix, x_offset, exptime,
