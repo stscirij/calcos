@@ -217,8 +217,7 @@ def main(args):
                           burstfile=burstfile)
         except Exception as e:
             cosutil.printError("Error running calcos(): %s" % e)
-            if stat == 0:
-                sys.exit(1)
+            sys.exit(1)
         status |= stat
     if status != 0:
         sys.exit(status)
