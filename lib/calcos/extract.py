@@ -245,14 +245,12 @@ def extract1D(input, incounts=None, output=None,
     ofd = add_column_comment(ofd, 'BACKGROUND_PER_PIXEL',
                              'Average background per pixel')
     ofd.writeto(output, output_verify="silentfix")
-    del ofd
+    ofd.close()
     ifd_e.close()
     if ifd_c is not None:
         ifd_c.close()
-
     if update_input and nrows > 0:
         copyKeywordsToInput(output, input, incounts)
-
     if switches["statflag"] == "PERFORM":
         cosutil.doSpecStat(output)
 

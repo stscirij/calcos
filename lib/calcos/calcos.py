@@ -41,6 +41,9 @@ NO_DATA_TO_CALIBRATE = 5
 # if a required row is missing from a reference table.
 BAD_APER_MISSING_ROW_EXCEPTION = 16
 
+# calcos will return this if something else went wrong
+UNSPECIFIED_ERROR = 1
+
 # If the input is a raw file rather than an association file, this flag
 # will be set to True.
 raw_input_trailer = False
@@ -79,7 +82,7 @@ def main(args):
         prtOptions()
         cosutil.printError(
         "An association file name or observation rootname must be specified.")
-        sys.exit()
+        sys.exit(UNSPECIFIED_ERROR)
 
     try:
         (options, pargs) = getopt.getopt(args, "qvrso:",
@@ -91,7 +94,7 @@ def main(args):
     except Exception as error:
         prtOptions()
         cosutil.printError(str(error))
-        sys.exit()
+        sys.exit(UNSPECIFIED_ERROR)
 
     if len(options) == 0:
         for i in range(len(pargs)):
@@ -99,7 +102,7 @@ def main(args):
                 prtOptions()
                 cosutil.printError(
                 "Command-line options must precede the association file name.")
-                sys.exit()
+                sys.exit(UNSPECIFIED_ERROR)
 
     # default values
     cosutil.setVerbosity(VERBOSE)
@@ -148,11 +151,11 @@ def main(args):
                     prtOptions()
                     cosutil.printError("Don't understand '--find %s'" %
                                        options[i][1])
-                    sys.exit()
+                    sys.exit(UNSPECIFIED_ERROR)
                 if cutoff < 0.:
                     prtOptions()
                     cosutil.printError("Cutoff for --find cannot be negative.")
-                    sys.exit()
+                    sys.exit(UNSPECIFIED_ERROR)
                 find_target["flag"] = True
                 find_target["cutoff"] = cutoff
         elif options[i][0] == "--nofind":
@@ -197,18 +200,25 @@ def main(args):
 
     status = 0
     for i in range(len(infiles)):
-        stat = calcos(infiles[i], outdir=outdir, verbosity=None,
-                      find_target=find_target,
-                      create_csum_image=create_csum_image,
-                      raw_csum_coords=raw_csum_coords,
-                      only_csum=only_csum,
-                      binx=binx, biny=biny,
-                      compress_csum=compress_csum,
-                      compression_parameters=compression_parameters,
-                      shift_file=shift_file,
-                      save_temp_files=save_temp_files,
-                      stimfile=stimfile, livetimefile=livetimefile,
-                      burstfile=burstfile)
+#
+# Put calcos in a try/except block so we can return a status if something goes wrong
+        try:
+            stat = calcos(infiles[i], outdir=outdir, verbosity=None,
+                          find_target=find_target,
+                          create_csum_image=create_csum_image,
+                          raw_csum_coords=raw_csum_coords,
+                          only_csum=only_csum,
+                          binx=binx, biny=biny,
+                          compress_csum=compress_csum,
+                          compression_parameters=compression_parameters,
+                          shift_file=shift_file,
+                          save_temp_files=save_temp_files,
+                          stimfile=stimfile, livetimefile=livetimefile,
+                          burstfile=burstfile)
+        except Exception as e:
+            cosutil.printError("Error running calcos(): %s" % e)
+            if stat == 0:
+                sys.exit(1)
         status |= stat
     if status != 0:
         sys.exit(status)
@@ -2812,7 +2822,6 @@ class Calibration(object):
             else:
                 cosutil.printWarning("No further processing for this dataset"
                                      " (status = %d)." % status)
-
         if any_x1dcorr == "PERFORM":
             self.concatenateSpectra("science")
 
