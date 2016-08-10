@@ -4064,7 +4064,6 @@ PyMODINIT_FUNC initccos(void)
 	mod = Py_InitModule("ccos", ccos_methods);
 #endif
 	import_array();
-
 	/* set the doc string */
 	dict = PyModule_GetDict(mod);
 #if defined(NPY_PY3K)

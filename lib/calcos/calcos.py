@@ -200,24 +200,18 @@ def main(args):
 
     status = 0
     for i in range(len(infiles)):
-#
-# Put calcos in a try/except block so we can return a status if something goes wrong
-        try:
-            stat = calcos(infiles[i], outdir=outdir, verbosity=None,
-                          find_target=find_target,
-                          create_csum_image=create_csum_image,
-                          raw_csum_coords=raw_csum_coords,
-                          only_csum=only_csum,
-                          binx=binx, biny=biny,
-                          compress_csum=compress_csum,
-                          compression_parameters=compression_parameters,
-                          shift_file=shift_file,
-                          save_temp_files=save_temp_files,
-                          stimfile=stimfile, livetimefile=livetimefile,
-                          burstfile=burstfile)
-        except Exception as e:
-            cosutil.printError("Error running calcos(): %s" % e)
-            sys.exit(1)
+        stat = calcos(infiles[i], outdir=outdir, verbosity=None,
+                      find_target=find_target,
+                      create_csum_image=create_csum_image,
+                      raw_csum_coords=raw_csum_coords,
+                      only_csum=only_csum,
+                      binx=binx, biny=biny,
+                      compress_csum=compress_csum,
+                      compression_parameters=compression_parameters,
+                      shift_file=shift_file,
+                      save_temp_files=save_temp_files,
+                      stimfile=stimfile, livetimefile=livetimefile,
+                      burstfile=burstfile)
         status |= stat
     if status != 0:
         sys.exit(status)
