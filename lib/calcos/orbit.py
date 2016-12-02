@@ -6,6 +6,8 @@ import astropy.io.fits as fits
 TWOPI       = 2. * math.pi
 SEC_PER_DAY = 86400.0
 
+from . import cosutil
+
 class HSTOrbit(object):
     """Orbital parameters.
 
@@ -172,7 +174,12 @@ class HSTOrbit(object):
         x_hst[1] = r * (sin_wbig * cos_f + cosincli * cos_wbig * sin_f)
         x_hst[2] = r * sineincl * sin_f
 
-        a0 = cirveloc * eccentry * sin_v / r
+        if r > 0.0:
+            a0 = cirveloc * eccentry * sin_v / r
+        else:
+            cosutil.printWarning("Invalid value for r, should be >0")
+            cosutil.printContinuation("Setting a0 to 0")
+            a0 = 0
         a1 = cirveloc * (1.0 + eccentry * cos_v) + \
                 TWOPI * rcargper * r
         v_hst[0] = a0 * x_hst[0] - \

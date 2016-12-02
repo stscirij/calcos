@@ -70,8 +70,13 @@ def cleanTrace(trace):
 
 def applyTrace(xcorr, yfull, trace, tracemask):
     """Apply the trace correction"""
+    trace_ncols = trace.size
     nevents = len(xcorr)
     ixcorr = xcorr.astype(np.int32)
+    #
+    # Make sure corrected events lie within the trace array
+    ixcorr = np.maximum(ixcorr, 0)
+    ixcorr = np.minimum(ixcorr, trace_ncols-2)
     #
     # remainder and delta are 1-d arrays
     remainder = xcorr - ixcorr
@@ -219,7 +224,8 @@ def maskAirglowLines(dq_image, info, disptab, airglow_bits):
         limits = airglow.findAirglowLimits(info, segment,disptab,
                                            airglow_line)
         if limits is not None:
-            colstart, colstop = limits
+            # Make sure colstart and colstop are integers
+            colstart, colstop = int(limits[0] + 0.5), int(limits[1] + 0.5)
             dq_image[:,colstart:colstop+1] = \
             np.bitwise_or(dq_image[:,colstart:colstop+1], airglow_bits)
     return

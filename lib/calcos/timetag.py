@@ -2414,7 +2414,7 @@ def traceShiftDQ(dq_array, traceprofile, wca_row):
     for column in range(ncolumns):
     #
     # Calculate the extent of the WCA aperture
-        wcacenter = wca_0 + int(round(column*wcaslope)) 
+        wcacenter = int(round(wca_0 + column*wcaslope))
         wcastart = wcacenter - wcaheight // 2
         wcastop = wcacenter + wcaheight // 2
         tracevalue = int(round(traceprofile[column]))
