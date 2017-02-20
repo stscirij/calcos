@@ -362,7 +362,7 @@ class Shift1(object):
         opt_elem = self.info["opt_elem"]
         wcp_info = cosutil.getTable(self.reffiles["wcptab"],
                                     filter={"opt_elem": opt_elem},
-                                    exactly_one=True}
+                                    exactly_one=True)
         try:
             # This field should exist in LP4 and later data
             self.chi_sq_threshold = wcp_info.field("N_SIGMA")
