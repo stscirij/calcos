@@ -220,6 +220,8 @@ def maskAirglowLines(dq_image, info, disptab, airglow_bits):
                                            airglow_line)
         if limits is not None:
             colstart, colstop = limits
+            colstart = int(colstart)
+            colstop = int(colstop)
             dq_image[:,colstart:colstop+1] = \
             np.bitwise_or(dq_image[:,colstart:colstop+1], airglow_bits)
     return
