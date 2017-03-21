@@ -220,6 +220,8 @@ def maskAirglowLines(dq_image, info, disptab, airglow_bits):
                                            airglow_line)
         if limits is not None:
             colstart, colstop = limits
+            colstart = int(colstart)
+            colstop = int(colstop)
             dq_image[:,colstart:colstop+1] = \
             np.bitwise_or(dq_image[:,colstart:colstop+1], airglow_bits)
     return
@@ -243,12 +245,12 @@ def applyWavelengthLimits(dq_image, info, proftab, disptab):
     #
     # Now get the dispersion information
     disp_rel = dispersion.Dispersion(disptab, filter)
-    min_column = float(disp_rel.evalInvDisp(wmin, tiny=1.0e-8))
-    max_column = float(disp_rel.evalInvDisp(wmax, tiny=1.0e-8))
+    min_column = int(float(disp_rel.evalInvDisp(wmin, tiny=1.0e-8)))
+    max_column = int(float(disp_rel.evalInvDisp(wmax, tiny=1.0e-8)))
     cosutil.printMsg("Lower wavelength limit of %f corresponds to column %d" % \
-                         (wmin, int(min_column)))
+                         (wmin, min_column))
     cosutil.printMsg("Upper wavelength limit of %f corresponds to column %d" % \
-                         (wmax, int(max_column)))
+                         (wmax, max_column))
     if min_column >= 0:
         dq_image[:, 0:min_column+1] = DQ_AIRGLOW
     if max_column <= FUV_X:
