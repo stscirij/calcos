@@ -1825,6 +1825,9 @@ class Association(object):
         Should be a single corrtag file, XTRCTALG should be set
         to 'BOXCAR', TRCECORR and ALGNCORR should be set to 'OMIT'
         """
+        if len(self.rawfiles) != 1:
+            if self.cl_args["location"] is not None or self.cl_args["extrsize"] is not None:
+                raise RuntimeError("Cannot specify location or extrsize unless input is a single corrtag file")
         if len(self.rawfiles) == 1 and cosutil.isCorrtag(self.rawfiles[0]):
             f1 = fits.open(self.rawfiles[0])       
             phdr = f1[0].header
