@@ -70,6 +70,10 @@ def main(args):
         --stim filename (append stim locations to filename)
         --live filename (append livetime factors to filename)
         --burst filename (append burst info to filename)
+    The following options are only available when the input is a corrtag file,
+    and when it has been processed using XTRCTALG='BOXCAR':
+        --location location_value
+        --extrsize extrsize_value
     Following the command-line options, there should be a list of one
     or more association files or raw files, specified by rootname with
     "_asn" or "_raw".
@@ -87,7 +91,8 @@ def main(args):
                             "version",
                             "csum", "raw", "only_csum",
                             "compress=", "binx=", "biny=",
-                            "shift=", "stim=", "live=", "burst="])
+                            "shift=", "stim=", "live=", "burst=",
+                            "location=", "extrsize="])
     except Exception as error:
         prtOptions()
         cosutil.printError(str(error))
@@ -119,6 +124,8 @@ def main(args):
     livetimefile = None
     burstfile = None
     outdir = None
+    location = None
+    extrsize = None
 
     for i in range(len(options)):
         if options[i][0] == "--version":
@@ -178,6 +185,10 @@ def main(args):
             livetimefile = options[i][1]
         elif options[i][0] == "--burst":
             burstfile = options[i][1]
+        elif options[i][0] == "--location":
+            location = float(options[i][1])
+        elif options[i][0] == "--extrsize":
+            extrsize = int(options[i][1])
 
     if only_csum:
         create_csum_image = True
@@ -208,7 +219,8 @@ def main(args):
                       shift_file=shift_file,
                       save_temp_files=save_temp_files,
                       stimfile=stimfile, livetimefile=livetimefile,
-                      burstfile=burstfile)
+                      burstfile=burstfile,
+                      location=location, extrsize=extrsize)
         status |= stat
     if status != 0:
         sys.exit(status)
@@ -237,6 +249,8 @@ def prtOptions():
     cosutil.printMsg("  --stim filename (append stim locations to filename)")
     cosutil.printMsg("  --live filename (append livetime factors to filename)")
     cosutil.printMsg("  --burst filename (append burst info to filename)")
+    cosutil.printMsg("  --location location_value (extraction location)")
+    cosutil.printMsg("  --extrsize extrsize_value (extraction size)")
     cosutil.printMsg("")
     cosutil.printMsg("Following the options, list one or more association")
     cosutil.printMsg("files (rootname_asn) or raw files (rootname_raw).")
@@ -306,7 +320,8 @@ def calcos(asntable, outdir=None, verbosity=None,
            compress_csum=False, compression_parameters="gzip,-0.01",
            shift_file=None,
            save_temp_files=False,
-           stimfile=None, livetimefile=None, burstfile=None):
+           stimfile=None, livetimefile=None, burstfile=None,
+           location=None, extrsize=None):
     """Calibrate COS data.
 
     This is the main module for calibrating COS data.
@@ -386,6 +401,12 @@ def calcos(asntable, outdir=None, verbosity=None,
     burstfile: str, optional
         If specified, burst information will be written to (or appended to)
         a text file with this name.
+
+    location: float, optional
+        Location of extracted spectrum (corrtag input only)
+
+    extrsize: float, optional
+        Extraction size in pixels (corrtag input only)
     """
 
     t0 = time.time()
@@ -419,7 +440,10 @@ def calcos(asntable, outdir=None, verbosity=None,
                "save_temp_files": save_temp_files,
                "stimfile": stimfile,
                "livetimefile": livetimefile,
-               "burstfile": burstfile}
+               "burstfile": burstfile,
+               "location": location,
+               "extrsize": extrsize}
+
 
     assoc = Association(asntable, outdir, cl_args)
     if len(assoc.obs) == 0:
@@ -796,6 +820,7 @@ class Association(object):
         self.globalSwitches()
         self.checkOutputExists()
         self.stimfileSanityCheck()
+        self.checkOKforCorrtag()
 
     def checkforWalk(self):
         """Check for the existence of any WALK-related keywords:
@@ -987,7 +1012,8 @@ class Association(object):
                 else:
                     other_segment = None
                 if other_segment is not None and \
-                   os.access(other_segment, os.R_OK):
+                   os.access(other_segment, os.R_OK) and \
+                   not cosutil.isCorrtag(memname):
                     rawfiles.append(other_segment)
                     rawfiles.sort()
             basic_info["rawfiles"] = rawfiles
@@ -1793,6 +1819,24 @@ class Association(object):
             self.cl_args["stimfile"] = None
             cosutil.printWarning(
                 "stimfile reset to None because detector is NUV.")
+
+    def checkOKforCorrtag(self):
+        """Check that the conditions are OK for corrtag input
+        Should be a single corrtag file, XTRCTALG should be set
+        to 'BOXCAR', TRCECORR and ALGNCORR should be set to 'OMIT'
+        """
+        if len(self.rawfiles) == 1 and cosutil.isCorrtag(self.rawfiles[0]):
+            f1 = fits.open(self.rawfiles[0])       
+            phdr = f1[0].header
+            errormessage = ''
+            if phdr['XTRCTALG'] != 'BOXCAR':
+                errormessage = "".join([errormessage, 'XTRCTALG should be set to BOXCAR\n'])
+            if phdr['TRCECORR'] != 'OMIT':
+                errormessage = "".join([errormessage, 'TRCECORR should be set to OMIT\n'])
+            if phdr['ALGNCORR'] != 'OMIT':
+                errormessage = "".join([errormessage, 'ALGNCORR should be set to OMIT\n'])
+            if len(errormessage) > 0:
+                raise RuntimeError(errormessage)
 
     def updateMempresent(self):
         """Update the ASN_PROD keyword and MEMPRSNT column."""
@@ -2918,8 +2962,11 @@ class Calibration(object):
         output = filenames["x1d_x"]
 
         find_target = self.assoc.cl_args["find_target"]
+        location = self.assoc.cl_args["location"]
+        extrsize = self.assoc.cl_args["extrsize"]
         extract.extract1D(input, incounts, output,
-                          find_target=find_target)
+                          find_target=find_target,
+                          location=location, extrsize=extrsize)
 
         # Copy keywords from input (the flt file) to corrtag.
         extract.updateCorrtagKeywords(input, corrtag)

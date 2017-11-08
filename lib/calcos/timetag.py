@@ -2266,7 +2266,6 @@ def doDqicorr(events, input, info, switches, reffiles,
     array like
         2-D data quality array.
     """
-
     # temp_switch is only used for printing the DQICORR message
     temp_switch = {}
     if switches["dqicorr"] == "COMPLETE" and info["corrtag_input"]:
@@ -2340,20 +2339,24 @@ def doDqicorr(events, input, info, switches, reffiles,
         #
         # Check the SP_OFF_[AB] keyword.  If it exists, and is not -999.0,
         # set doBlur to True.  Otherwise, set keep it False
-        try:
-            #
-            # Since the trace correction is SUBTRACTED, whereas the alignment
-            # corrction is ADDED, we need to subtract the alignment correction
-            # from the trace correction to ensure they are applied correctly.
-            # The header keyword is the NEGATIVE of the alignment correction,
-            # so we'll just add this.
-            alignment_correction = hdr[keyword]
-            if alignment_correction > -998.0:
-                doBlur = True
-            else:
+        # If the input data is a corrtag file, don't do this check
+        if not info["corrtag_input"]:
+            try:
+                #
+                # Since the trace correction is SUBTRACTED, whereas the alignment
+                # corrction is ADDED, we need to subtract the alignment correction
+                # from the trace correction to ensure they are applied correctly.
+                # The header keyword is the NEGATIVE of the alignment correction,
+                # so we'll just add this.
+                alignment_correction = hdr[keyword]
+                if alignment_correction > -998.0:
+                    doBlur = True
+                else:
+                    alignment_correction = 0.0
+            except KeyError:
                 alignment_correction = 0.0
-        except KeyError:
-            alignment_correction = 0.0
+        else:
+            cosutil.printMsg("Input is corrtag file, skipping blurdq")
         #
         # Check whether the trace correction was done.  If it was, and even if
         # the alignment correction is zero or not done, add the alignment

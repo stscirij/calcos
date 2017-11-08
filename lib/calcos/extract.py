@@ -599,6 +599,7 @@ def doExtract(ifd_e, ifd_c, ofd, nelem,
         exptime = hdr.get(exptime_key, default=hdr["exptime"])
 
         if is_corrtag:
+            cosutil.printMsg("Corrtag extraction routine running")
             key = "shift1" + segment[-1]
             shift1 = ofd[1].header.get(key, 0.)
             (N_i, ERR_i, GC_i, GCOUNTS_i, BK_i, DQ_i, DQ_WGT_i, DQ_ALL_i,
@@ -615,6 +616,7 @@ def doExtract(ifd_e, ifd_c, ofd, nelem,
                                local_find_targ)
         else:
             if info["xtrctalg"] == 'BOXCAR':
+                print("Boxcar extraction routine running")
                 (N_i, ERR_i, GC_i, GCOUNTS_i, BK_i, DQ_i, DQ_WGT_i, DQ_ALL_i,
                  LOWER_OUTER_i, UPPER_OUTER_i, LOWER_INNER_i, UPPER_INNER_i,
                  ENCLOSED_FRACTION_i, BACKGROUND_PER_ROW_i, EE_LOWER_OUTER_i,
@@ -630,6 +632,7 @@ def doExtract(ifd_e, ifd_c, ofd, nelem,
                                            user_xdisp_locn, user_xdisp_size,
                                            local_find_targ)
             elif info["xtrctalg"] == 'TWOZONE':
+                print("Two-zone extraction routine running")
                 (N_i, ERR_i, GC_i, GCOUNTS_i, BK_i, DQ_i, DQ_WGT_i, DQ_ALL_i,
                  LOWER_OUTER_i, UPPER_OUTER_i, LOWER_INNER_i, UPPER_INNER_i,
                  ENCLOSED_FRACTION_i, BACKGROUND_PER_ROW_i, EE_LOWER_OUTER_i,
@@ -1032,7 +1035,7 @@ def extractSegmentBoxcar(e_data, c_data, e_dq_data, ofd_header, segment,
 
     if user_xdisp_size is not None:
         extr_height = user_xdisp_size   # use the user-specified value
-
+    cosutil.printMsg("Using extraction height of %d pixels" % (extr_height))
     # Compute the data quality and data quality weight arrays.
     DQ_i = np.zeros(axis_length, dtype=np.int16)
     if e_dq_data is not None:
