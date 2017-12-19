@@ -186,9 +186,17 @@ def main(args):
         elif options[i][0] == "--burst":
             burstfile = options[i][1]
         elif options[i][0] == "--location":
-            location = float(options[i][1])
+            location_argument = options[i][1]
+            if type(location_argument) == str:
+                location = [float(x) for x in location_argument.split()]
+            else:
+                location = float(location_argument)
         elif options[i][0] == "--extrsize":
-            extrsize = int(options[i][1])
+            extrsize_argument = options[i][1]
+            if type(extrsize_argument) == str:
+                extrsize = [int(x) for x in extrsize_argument.split()]
+            else:
+                extrsize = int(extrsize_argument)
 
     if only_csum:
         create_csum_image = True
