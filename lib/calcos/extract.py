@@ -935,7 +935,6 @@ def extractSegmentBoxcar(e_data, c_data, e_dq_data, ofd_header, segment,
         background count rate, data quality array, data quality weight
         array
     """
-
     local_find_targ = copy.deepcopy(find_target)
 
     try:
@@ -1156,7 +1155,7 @@ def extractSegmentBoxcar(e_data, c_data, e_dq_data, ofd_header, segment,
     #
     # Make the INDEXes all vectors that follow the slope
     half_height = extr_height // 2
-    y0 = (b_spec - half_height) + slope * np.arange(float(axis_length))
+    y0 = (int(b_spec + 0.5) - half_height) + slope * np.arange(float(axis_length))
     LOWER_OUTER_INDEX_i = (y0 + 0.5).astype(int)
     UPPER_OUTER_INDEX_i = LOWER_OUTER_INDEX_i + extr_height - 1
     LOWER_INNER_INDEX_i = LOWER_OUTER_INDEX_i.copy()
@@ -1370,7 +1369,6 @@ def extractSegmentTwozone(e_data, c_data, e_dq_data, ofd_header, segment,
         fraction of flux enclosed between upper outer zone boundary and
         lower aperture boundary
     """
-    cosutil.printMsg("Two-zone extraction method")
     #
     # Check that the sdqouter dq value is in sdqflags, and print a warning
     # if it isn't
@@ -1901,7 +1899,6 @@ def extractCorrtag(xi, eta, dq, epsilon, dq_array,
         background count rate, data quality array, data quality weight
         array
     """
-
     local_find_targ = copy.deepcopy(find_target)
 
     try:

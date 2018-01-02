@@ -1842,10 +1842,16 @@ class Association(object):
             errormessage = ''
             if phdr['XTRCTALG'] != 'BOXCAR':
                 errormessage = "".join([errormessage, 'XTRCTALG should be set to BOXCAR\n'])
-            if phdr['TRCECORR'] != 'OMIT':
-                errormessage = "".join([errormessage, 'TRCECORR should be set to OMIT\n'])
-            if phdr['ALGNCORR'] != 'OMIT':
-                errormessage = "".join([errormessage, 'ALGNCORR should be set to OMIT\n'])
+            try:
+                if phdr['TRCECORR'] != 'OMIT':
+                    errormessage = "".join([errormessage, 'TRCECORR should be set to OMIT\n'])
+            except KeyError:
+                pass
+            try:
+                if phdr['ALGNCORR'] != 'OMIT':
+                    errormessage = "".join([errormessage, 'ALGNCORR should be set to OMIT\n'])
+            except KeyError:
+                pass
             if len(errormessage) > 0:
                 raise RuntimeError(errormessage)
 
