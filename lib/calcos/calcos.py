@@ -1840,8 +1840,11 @@ class Association(object):
             f1 = fits.open(self.rawfiles[0])       
             phdr = f1[0].header
             errormessage = ''
-            if phdr['XTRCTALG'] != 'BOXCAR':
-                errormessage = "".join([errormessage, 'XTRCTALG should be set to BOXCAR\n'])
+            try:
+                if phdr['XTRCTALG'] != 'BOXCAR':
+                    errormessage = "".join([errormessage, 'XTRCTALG should be set to BOXCAR\n'])
+            except KeyError:
+                pass
             try:
                 if phdr['TRCECORR'] != 'OMIT':
                     errormessage = "".join([errormessage, 'TRCECORR should be set to OMIT\n'])
