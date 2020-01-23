@@ -11,10 +11,11 @@ from __future__ import division         # confidence high
 # Rather than having some versions in one file and some versions
 # in another, it seems conceptually cleaner to continue making
 # all the version information available here in calcosparam.
-from . import __version__
+from .version import *
 
 CALCOS_VERSION_NUMBER = __version__
-CALCOS_VERSION = "%s" % (CALCOS_VERSION_NUMBER)
+CALCOS_VERSION_DATE = __vdate__
+CALCOS_VERSION = "%s (%s)" % (CALCOS_VERSION_NUMBER, CALCOS_VERSION_DATE)
 
 # These are the values to indicate the detector (original) and user
 # (flipped or rotated) COS coordinates.

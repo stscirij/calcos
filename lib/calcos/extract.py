@@ -1656,8 +1656,8 @@ def getBackground(data_ij, dq_ij, xtract_info, centroid, sdqflags):
 
     BK1_ij = getBackgroundRegion(data_ij, b_bkg1, bkg_height1)
     dq1_ij = getBackgroundRegion(dq_ij, b_bkg1, bkg_height1)
+    good1_ij = np.where(np.bitwise_and(dq1_ij, sdqflags), 0.0, 1.0)
     if BK1_ij is not None:
-        good1_ij = np.where(np.bitwise_and(dq1_ij, sdqflags), 0.0, 1.0)
         n_bkg1_rows = good1_ij.sum(axis=0)
         BK1_ij = BK1_ij * good1_ij
         bk1_i = BK1_ij.sum(axis=0, dtype=np.float64)
@@ -1667,8 +1667,8 @@ def getBackground(data_ij, dq_ij, xtract_info, centroid, sdqflags):
         cosutil.printWarning("Background region 1 is outside data array")
     BK2_ij = getBackgroundRegion(data_ij, b_bkg2, bkg_height2)
     dq2_ij = getBackgroundRegion(dq_ij, b_bkg2, bkg_height2)
+    good2_ij = np.where(np.bitwise_and(dq2_ij, sdqflags), 0.0, 1.0)
     if BK2_ij is not None:
-        good2_ij = np.where(np.bitwise_and(dq2_ij, sdqflags), 0.0, 1.0)
         n_bkg2_rows = good2_ij.sum(axis=0)
         BK2_ij = BK2_ij * good2_ij
         bk2_i = BK2_ij.sum(axis=0, dtype=np.float64)
@@ -2175,8 +2175,7 @@ def doFluxCorr(ofd, info, reffiles, tdscorr):
         tdstab = reffiles["tdstab"]
         t_obs = (ofd[1].header["expstart"] + ofd[1].header["expend"]) / 2.
         filter = {"opt_elem": info["opt_elem"],
-                  "aperture": info["aperture"],
-                  "cenwave": info["cenwave"]}
+                  "aperture": info["aperture"]}
         # First check for dummy rows in the TDS table.  If there is no
         # pedigree column, assume all rows are good (i.e. not dummy).
         dummy = False           # initial value

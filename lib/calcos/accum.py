@@ -118,14 +118,13 @@ def accumBasicCalibration(input, inpha, outtag,
         # The number of rows in the pseudo time-tag table will be equal to
         # the total number of counts in the input image.
         fd = fits.open(input, mode="copyonwrite")
-        sci_hdu = fd[("SCI", 1)]
         sci = fd[("SCI",1)].data
         fd.close()
         nrows = getNcounts(sci)
         if nrows == 0:
             info["npix"] = (0,)
 
-    hdu = cosutil.createCorrtagHDU(nrows, info["detector"], sci_hdu)
+    hdu = cosutil.createCorrtagHDU(nrows, info["detector"], headers[1])
     hdu.header["extname"] = "EVENTS"
 
     if nrows > 0:
@@ -792,7 +791,7 @@ def appendImset(output, imset, sci_array, err_array, dq_array,
         Header for DQ extension.
     """
 
-    fd = fits.open(output, mode="update")
+    fd = fits.open(output, mode="append")
 
     hdu = fits.ImageHDU(data=sci_array, header=sci_hdr, name="SCI")
     hdu.header["EXTVER"] = imset
