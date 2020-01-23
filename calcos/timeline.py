@@ -222,15 +222,12 @@ def makeSptFileName(input):
     str
         Name of support file, or "notfound".
     """
-
-    sptfile = "notfound"        # initial value
-    i = input.find("_raw")
-    if i >= 0:
-        sptfile = input[:i] + "_spt.fits"
-    else:
-        i = input.find("_corrtag")
-        if i >= 0:
-            sptfile = input[:i] + "_spt.fits"
+    pathname = os.path.dirname(input)
+    filename = os.path.basename(input)
+    rootname = filename.split("_")[0]
+    sptfile = os.path.join(pathname, rootname + "_spt.fits")
+    if not os.path.isfile:
+        sptfile = "notfound"
 
     return sptfile
 
@@ -366,7 +363,11 @@ def timelineHDU(nrows_timeline, hdr):
                            unit="count /s /pixel", disp="G15.6"))
     cd = fits.ColDefs(col)
 
-    hdu = fits.BinTableHDU.from_columns(cd, header=hdr, nrows=nrows_timeline)
+    #
+    # Remove WCS keywords from table header
+    newheader = cosutil.remove_WCS_keywords(hdr, cd)
+
+    hdu = fits.BinTableHDU.from_columns(cd, header=newheader, nrows=nrows_timeline)
 
     hdu.header.set("extname", "TIMELINE", after="TFIELDS")      # xxx temp
     hdu.header.set("extver", 1, after="EXTNAME")        # xxx temporary
