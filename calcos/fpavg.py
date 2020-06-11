@@ -80,6 +80,7 @@ def oneInputFile(input, output):
     flux = data.field("flux")
     error = data.field("error")
     gross = data.field("gross")
+    gcounts = data.field("gcounts")
     net = data.field("net")
     background = data.field("background")
     dq_wgt = data.field("dq_wgt")
@@ -88,6 +89,7 @@ def oneInputFile(input, output):
         flux[row,:] = np.where(dq_wgt[row] <= 0., 0., flux[row])
         error[row,:] = np.where(dq_wgt[row] <= 0., 0., error[row])
         gross[row,:] = np.where(dq_wgt[row] <= 0., 0., gross[row])
+        gcounts[row,:] = np.where(dq_wgt[row] <= 0., 0., gcounts[row])
         net[row,:] = np.where(dq_wgt[row] <= 0., 0., net[row])
         background[row,:] = np.where(dq_wgt[row] <= 0., 0., background[row])
 
