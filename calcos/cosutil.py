@@ -947,7 +947,7 @@ def timelineTimes(first_time, last_time, dt=1.):
         tl_time = np.arange(1, dtype=np.float32)
     else:
         # add one so every event will be within the array of times
-        nelem = int(round((last_time - first_time) / dt)) + 1
+        nelem = int(round((np.float64(last_time) - np.float64(first_time)) / dt)) + 1
         tl_time = first_time + dt * np.arange(nelem, dtype=np.float32)
 
     return tl_time
@@ -1712,9 +1712,13 @@ def fuvFlagOutOfBounds(hdr, dq_array, info, switches,
         y_left  = np.arange(y0, y1, dtype=np.float32)
         y_right = np.arange(y0, y1, dtype=np.float32)
         y_lower = y0 + 0. * x_lower
+        y_lower = y_lower.astype('float32')
         y_upper = (y1 - 1.) + 0. * x_upper
+        y_upper = y_upper.astype('float32')
         x_left  = x0 + 0. * y_left
+        x_left = x_left.astype('float32')
         x_right = (x1 - 1.) + 0. * y_right
+        x_right = x_right.astype('float32')
         # These are independent variable arrays for interpolation.
         x_lower_uniform = np.arange(nx, dtype=np.float32)
         x_upper_uniform = np.arange(nx, dtype=np.float32)

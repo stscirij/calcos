@@ -2952,7 +2952,7 @@ def initHelcorr(events, info, hdr):
     # get midpoint of exposure, MJD
     expstart = info["expstart"]
     time = events.field("time")
-    t_mid = expstart + (time[0] + time[len(time)-1]) / 2. / SEC_PER_DAY
+    t_mid = expstart + (time[0] + time[len(time)-1]).astype('float64') / 2. / SEC_PER_DAY
 
     # Compute radial velocity and heliocentric correction factor (the latter
     # is actually not used here).
@@ -3903,7 +3903,7 @@ def writeImages(x, y, epsilon, dq,
 
     # Use the Frequentist variance function.
     err_lower, err_upper = cosutil.errFrequentist(C_counts)
-    errC_rate = err_upper / exptime
+    errC_rate = np.float32(err_upper / exptime)
 
     if outcounts is not None:
         C_rate = C_counts / exptime
@@ -3957,9 +3957,8 @@ def makeImage(outimage, phdr, headers, sci_array, err_array, dq_array):
     fd = fits.HDUList(primary_hdu)
     fd[0].header["nextend"] = 3
     cosutil.updateFilename(fd[0].header, outimage)
-
-    makeImageHDU(fd, headers[1], sci_array, name="SCI")
-    makeImageHDU(fd, headers[2], err_array, name="ERR")
+    makeImageHDU(fd, headers[1], sci_array.astype('float32'), name="SCI")
+    makeImageHDU(fd, headers[2], err_array.astype('float32'), name="ERR")
     makeImageHDU(fd, headers[3], dq_array, name="DQ")
 
     fd.writeto(outimage, output_verify='silentfix')

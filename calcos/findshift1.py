@@ -843,8 +843,8 @@ class Shift1(object):
 
         (s0, s1) = self.spec_slice
         (t0, t1) = self.tmpl_slice
-        spec = spectrum[s0:s1]
-        tmpl = template[t0:t1]
+        spec = spectrum[s0:s1].astype('float64')
+        tmpl = template[t0:t1].astype('float64')
 
         # Normalize the spectrum to match the template.
         n_spec = (spec - self.baseline) / self.factor

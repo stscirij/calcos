@@ -45,6 +45,8 @@ BAD_APER_MISSING_ROW_EXCEPTION = 16
 # will be set to True.
 raw_input_trailer = False
 
+numpy._set_promotion_state("weak_and_warn")
+
 def main(args=sys.argv[1:]):
     """Check arguments and call calcos.
 
