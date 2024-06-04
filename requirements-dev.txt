@@ -1,5 +1,6 @@
 # Use weekly astropy dev build
 --extra-index-url https://pypi.anaconda.org/astropy/simple astropy --pre
+astropy>=7.0.dev0
 
 # Use Bi-weekly numpy/scipy dev builds
 --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
