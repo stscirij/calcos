@@ -38,6 +38,7 @@ setup(
     install_requires=[
         'astropy>=6.0.0',
         'scipy',
+        'numpy>=2.0.0rc2',
         'stsci.tools>=4.0.0',
     ],
     extras_require={

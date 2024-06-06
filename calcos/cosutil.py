@@ -1777,7 +1777,11 @@ def fuvFlagOutOfBounds(hdr, dq_array, info, switches,
                                           ny, dy)
         (x_left, x_right)  = applyOffsets(x_left_interp, x_right_interp,
                                           nx, dx, x_offset)
-
+        
+        y_lower = np.float32(y_lower)
+        y_upper = np.float32(y_upper)
+        x_left = np.float32(x_left)
+        x_right = np.float32(x_right)
         ccos.clear_rows(temp, y_lower, y_upper, x_left, x_right)
     elif save_sub is not None:
         (x0, x1, y0, y1) = save_sub
