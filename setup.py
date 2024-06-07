@@ -35,12 +35,6 @@ setup(
     name=PACKAGENAME,
     use_scm_version={'write_to': 'calcos/version.py'},
     setup_requires=['setuptools_scm'],
-    install_requires=[
-        'astropy>=6.0.0',
-        'scipy',
-        'numpy>=2.0.0rc2',
-        'stsci.tools>=4.0.0',
-    ],
     extras_require={
         'docs': [
             'sphinx<7',
