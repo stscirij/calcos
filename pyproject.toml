@@ -1,14 +1,33 @@
-[dependencies] = [
-    "astropy >= 6.1",
-    "stsci.tools >= 4.0.0",
-    "numpy >= 2.0.0rc2",
-    "scipy >= 1.9.3",
-]
 [build-system]
 requires = [
-    "setuptools>=42.0",
+    "setuptools>=61.2",
     "setuptools_scm[toml]>=3.4",
     "wheel",
     "numpy>=2.0.0rc2",
 ]
 build-backend = 'setuptools.build_meta'
+
+[project]
+name = "calcos"
+authors = [
+    { name = "Robert Jedrzejewski, Phil Hodge" }
+]
+description = "Calibration software for COS (Cosmic Origins Spectrograph)"
+dynamic = ["version"]
+requires-python = ">=3.9"
+dependencies = [
+    "astropy>=6.1",
+    "stsci.tools>=4.0.0",
+    "numpy>=2.0.0rc2",
+    "scipy>=1.9.3",
+]
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.license]
+file = "LICENSE"
+content-type = "text/plain"
+
+[project.scripts]
+calcos = "calcos.calcos:main"
