@@ -24,7 +24,7 @@ bc.failedFailureThresh = 6
 // Dev dependencies
 bc1 = utils.copy(bc)
 bc1.name = "build with numpy 2, but install numpy 1.26"
-bc1.build_cmds.append("pip install numpy==1.26")
+bc1.build_cmds << "pip install numpy==1.26"
                    
 //bc1.build_cmds = ["pip install -e .[test]",
 //                  "pip install astropy>=0.0.dev0 --upgrade --no-deps",
