@@ -1,3 +1,9 @@
+[dependencies] = [
+    "astropy >= 6.1",
+    "stsci.tools >= 4.0.0",
+    "numpy >= 2.0.0rc2",
+    "scipy >= 1.9.3",
+]
 [build-system]
 requires = [
     "setuptools>=42.0",
