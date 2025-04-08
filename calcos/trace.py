@@ -430,6 +430,11 @@ def getScienceCentroid(rebinned_data, dq_array, xtract_info,
         else:
             cosutil.printWarning("Centroid is not defined in science data")
             status = CENTROID_UNDEFINED
+            # This happens if the sum of the counts in the extraction region is
+            # exactly zero (usually a very short exposure with no counts)
+            cosutil.printWarning("No counts in extraction region")
+            cosutil.printContinuation("Centroid set to input value from reference file: {}".format(startcenter))
+            return status, startcenter, goodcolumns, regions
         center = centroid
         if iteration == n_iterations - 1:
             #
@@ -509,9 +514,12 @@ def getCentroidError(events, info, goodcolumns, regions):
     rowstop = regions['specstop']
     centroid = getCentroid(counts_ij, goodcolumns, rowstart, rowstop,
                            background)
-    error = calculateCentroidError(counts_ij, goodcolumns, regions,
-                                   centroid, background=background)
-    return error
+    if centroid is not None:
+        error = calculateCentroidError(counts_ij, goodcolumns, regions,
+                                       centroid, background=background)
+        return error
+    else:
+        return None
 
 def calculateCentroidError(data_ij, goodcolumns, regions,
                            centroid, background=0.0):
