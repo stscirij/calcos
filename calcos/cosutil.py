@@ -2547,7 +2547,7 @@ def doTagFlashStat(fd):
     n = 0
     for row in range(nrows):
         max_gross = max(max_gross, np.maximum.reduce(gross[row]))
-        sum_gross += np.sum(gross[row])
+        sum_gross += np.sum(gross[row], dtype=np.float64)
         n += nelem[row]
 
     sci_extn.header["ngoodpix"] = n
@@ -2604,7 +2604,7 @@ def computeStat(sci_band, err_band=None, dq_band=None, sdqflags=3832):
     stat_info["ngoodpix"] = ngoodpix
     if ngoodpix > 0:
         stat_info["sci_goodmax"] = np.maximum.reduce(sci_good)
-        stat_info["sci_goodmean"] = np.sum(sci_good) / ngoodpix
+        stat_info["sci_goodmean"] = np.sum(sci_good, dtype=np.float64) / ngoodpix
     del sci_good
 
     # Compute statistics for the err array.
@@ -2616,7 +2616,7 @@ def computeStat(sci_band, err_band=None, dq_band=None, sdqflags=3832):
         if ngoodpix > 0:
             stat_info["err_goodmax"] = np.maximum.reduce(err_good)
             stat_info["err_goodmean"] = \
-                      np.sum(err_good) / ngoodpix
+                      np.sum(err_good, dtype=np.float64) / ngoodpix
 
     return stat_info
 
