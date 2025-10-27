@@ -1,7 +1,6 @@
 # CALCOS
 
-[![Jenkins CI](https://ssbjenkins.stsci.edu/job/STScI/job/calcos/job/master/badge/icon)](https://ssbjenkins.stsci.edu/job/STScI/job/calcos/job/master/)
-
+[![Regression tests](https://github.com/spacetelescope/RegressionTests/actions/workflows/calcos.yml/badge.svg)](https://github.com/spacetelescope/RegressionTests/actions/workflows/calcos.yml)
 Calibration software for HST/COS.
 
 Nightly regression test results are available only from within the STScI
