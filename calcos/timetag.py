@@ -1540,6 +1540,21 @@ def computeThermalParam(time, x, y, dq,
         (s2, sumsq2, counts2, found_s2) = \
                 findStim(x[i:j], y[i:j], s2_ref, xwidth, ywidth)
 
+        if cosutil.checkVerbosity(VERY_VERBOSE):
+            cosutil.printMsg(f"Segment {segment}")
+            cosutil.printMsg(f"STIM 1: found: {found_s1}, Y={s1[0]:.1f}, X={s1[1]:.1f}")
+            cosutil.printMsg(f"STIM 2: found: {found_s2}, Y={s2[0]:.1f}, X={s2[1]:.1f}")
+
+        if s2[0] is None and s1[0] is not None:
+            # If only one stim was found, use the location of that stim to
+            # estimate the location of the other stim using an empirical relation
+            # between the stim positions
+            extrap_y = extrapolate_stim(segment, s1[0])
+            s2 = (extrap_y, s2[1])
+            found_s2 = True
+            sumsq2 = (sumsq1[0], sumsq2[1])
+            cosutil.printWarning(f"STIM2 Y position ({extrap_y:.1f}) was extrapolated from STIM1 Y position")
+
         # Increment sums for averaging the stim positions.
         sumstim = updateStimSum(sumstim, counts1, s1, sumsq1, found_s1,
                                 counts2, s2, sumsq2, found_s2)
@@ -1681,34 +1696,96 @@ def findStim(x, y, stim_ref, xwidth, ywidth):
     syhigh = min(syhigh, 1022)
 
     # Initial value of mask is 1. (which in this case means "good").
-    mask = np.ones(len(x), dtype=np.float32)
+    x_mask = np.ones(len(x), dtype=np.float32)
+    y_mask = np.ones(len(y), dtype=np.float32)
 
     # Now set mask to 0. ("bad") outside the search region.
-    mask = np.where(x > sxhigh, 0., mask)
-    mask = np.where(x < sxlow,  0., mask)
-    mask = np.where(y > syhigh, 0., mask)
-    mask = np.where(y < sylow,  0., mask)
-    n = np.sum(mask)
-    if n > 0.:
+    x_mask = np.where(x > sxhigh, 0., x_mask)
+    x_mask = np.where(x < sxlow,  0., x_mask)
+    x_mask = np.where(y > syhigh, 0., x_mask)
+    # Only filter out the low values for STIM1 (the upper left one)
+    # Leave events with lower Y values in for calculating X position of STIM2
+    if stim_ref[0] > 512:
+        x_mask = np.where(y < sylow,  0., x_mask)
+
+    y_mask = np.where(y > syhigh, 0., y_mask)
+    y_mask = np.where(y < sylow,  0., y_mask)
+    y_mask = np.where(x > sxhigh, 0., y_mask)
+    y_mask = np.where(x < sxlow,  0., y_mask)
+
+    n_x = np.sum(x_mask)
+    n_y = np.sum(y_mask)
+
+    if n_x > 0.0:
         # The stim reference position is subtracted before taking the sum
         # and then added back to the average in order to reduce the
         # possibility of numerical roundoff errors.
-        sumx = np.sum((x-stim_ref[1]) * mask)
-        sumy = np.sum((y-stim_ref[0]) * mask)
-        sx = sumx / n + stim_ref[1]
-        sy = sumy / n + stim_ref[0]
+        sumx = np.sum((x-stim_ref[1]) * x_mask)
+        sx = sumx / n_x + stim_ref[1]
         # sum of squared deviations, for computing RMS
-        sumxsq = np.sum((x-sx)**2 * mask)
-        sumysq = np.sum((y-sy)**2 * mask)
-        found_stim = True
+        sumxsq = np.sum((x-sx)**2 * x_mask)
+        found_stim_x = True
     else:
         sx = None
-        sy = None
         sumxsq = None
+        found_stim_x = False
+
+    if n_y > 0.0:
+        # The stim reference position is subtracted before taking the sum
+        # and then added back to the average in order to reduce the
+        # possibility of numerical roundoff errors.
+        sumy = np.sum((y-stim_ref[0]) * y_mask)
+        sy = sumy / n_y + stim_ref[0]
+        # sum of squared deviations, for computing RMS
+        sumysq = np.sum((y-sy)**2 * y_mask)
+        found_stim_y = True
+    else:
+        sy = None
         sumysq = None
-        found_stim = False
+        found_stim_y = False
+
+    found_stim = found_stim_x and found_stim_y
+    n = max(n_x, n_y)
 
     return ((sy, sx), (sumysq, sumxsq), n, found_stim)
+
+
+def extrapolate_stim(segment, stim):
+    """Extrapolate the STIM2 y position from the STIM1 y position.
+    
+    Parameters
+    ----------
+    segment : str
+        Segment name (FUVA or FUVB).
+        
+    stim : float
+        The y location of STIM1.
+    """
+
+    coefficients = get_stim_extrapolation_coeffients(segment)
+
+    return coefficients[0] + coefficients[1] * stim
+
+def get_stim_extrapolation_coeffients(segment):
+    """Get the coefficients for extrapolating the STIM2 y position from the
+    STIM1 y position.
+
+    Parameters
+    ----------
+    segment : str
+        Segment name (FUVA or FUVB).
+    """
+
+    if segment == "FUVA":
+        slope = 0.89019
+        intercept = -845.08779
+    elif segment == "FUVB":
+        slope = 0.96293
+        intercept = -916.30214
+    else:
+        raise ValueError(f"Invalid segment name: {segment}")
+
+    return (intercept, slope)
 
 def updateStimSum(sumstim, nevents1, s1, sumsq1, found_s1,
                   nevents2, s2, sumsq2, found_s2):
